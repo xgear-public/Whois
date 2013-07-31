@@ -1,0 +1,21 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/common_padding_mid" >
+
+    <Button
+        android:id="@+id/compare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/compare" />
+
+    <ImageView
+        android:id="@+id/user_icon"
+        android:layout_width="@dimen/user_icon"
+        android:layout_height="@dimen/user_icon"
+        android:paddingTop="@dimen/common_padding_mid"
+        android:scaleType="fitCenter" />
+
+</LinearLayout>

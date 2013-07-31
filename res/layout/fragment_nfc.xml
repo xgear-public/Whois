@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/party_name"
+        android:layout_width="@dimen/user_icon"
+        android:layout_height="wrap_content"
+        android:gravity="center" />
+
+    <ImageView
+        android:id="@+id/user_icon"
+        android:layout_width="@dimen/user_icon"
+        android:layout_height="@dimen/user_icon"
+        android:paddingTop="@dimen/common_padding_mid"
+        android:scaleType="fitCenter" />
+
+    <Button
+        android:id="@+id/add_to_friends"
+        android:layout_width="@dimen/user_icon"
+        android:layout_height="wrap_content"
+        android:text="@string/add_to_friends" />
+
+</LinearLayout>
