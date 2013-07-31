@@ -4,6 +4,7 @@
         android:id="@+id/action_setup_username"
         android:orderInCategory="100"
         android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_edit"
         android:title="@string/setup_username"/>
 
 </menu>

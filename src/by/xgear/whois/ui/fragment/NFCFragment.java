@@ -1,6 +1,6 @@
 package by.xgear.whois.ui.fragment;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,13 +18,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import by.xgear.whois.HomeActivity;
 import by.xgear.whois.R;
 import by.xgear.whois.WhoisApplication;
+import by.xgear.whois.adapter.TasteAdapter;
 import by.xgear.whois.entity.ComparisonRoot;
-import by.xgear.whois.entity.Image;
+import by.xgear.whois.entity.Person;
 import by.xgear.whois.entity.UserInfoRoot;
 import by.xgear.whois.rest.RestHelper;
 
@@ -39,16 +41,21 @@ public class NFCFragment extends Fragment {
 	private TextView mPartyName;
 	private Button mAddToFriends;
 	private String mPayload;
+	private ListView mTasteList;
+	private TasteAdapter mAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Intent intent = getActivity().getIntent();
-//		Parcelable[] messages = intent
-//				.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-//		NdefMessage message = (NdefMessage) messages[0];
-//		NdefRecord record = message.getRecords()[0];
-		mPayload = intent.getExtras().getString("payload");
+		Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+		if (messages != null) {
+			NdefMessage message = (NdefMessage) messages[0];
+			NdefRecord record = message.getRecords()[0];
+			mPayload = new String(record.getPayload());
+		} else
+			mPayload = intent.getExtras().getString("payload");
+		mAdapter = new TasteAdapter(new ArrayList<Person>());
 	}
 
 	@Override
@@ -58,6 +65,8 @@ public class NFCFragment extends Fragment {
 		mUserIcon = (ImageView) v.findViewById(R.id.user_icon);
 		mAddToFriends = (Button) v.findViewById(R.id.add_to_friends);
 		mPartyName = (TextView) v.findViewById(R.id.party_name);
+		mTasteList = (ListView) v.findViewById(R.id.taste_list);
+		mTasteList.setAdapter(mAdapter);
 		return v;
 	}
 
@@ -71,7 +80,7 @@ public class NFCFragment extends Fragment {
 				@Override
 				public void onResponse(UserInfoRoot response) {
 					Toast.makeText(getActivity(), "Success", Toast.LENGTH_SHORT).show();
-					ImageLoader.getInstance().displayImage(getBestUrl(response.getUser().getImages()),mUserIcon);
+					ImageLoader.getInstance().displayImage(TasteAdapter.getBestUrl(response.getUser().getImages()),mUserIcon);
 				}
 			}, new ErrorListener(){
 
@@ -91,8 +100,12 @@ public class NFCFragment extends Fragment {
 					@Override
 					public void onResponse(ComparisonRoot response) {
 						if(response != null && response.getComparison() != null) {
+							int grey = Color.rgb(173, 173, 173);
+							
 							int alpha = (int) (255*Double.parseDouble(response.getComparison().getResult().getScore()));
 							mAddToFriends.setBackgroundColor(Color.argb(alpha,124,252,0));
+							mAdapter.setData(response.getComparison().getResult().getArtists().getArtists());
+							mAdapter.notifyDataSetChanged();
 						}
 					}
 				},
@@ -111,11 +124,6 @@ public class NFCFragment extends Fragment {
 		
 	}
 	
-	private String getBestUrl(List<Image> images) {
-		String url = null;
-		
-		return url;
-	}
 
 	@Override
 	public void onStop() {

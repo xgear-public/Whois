@@ -3,6 +3,8 @@
     <dimen name="common_padding_big">16dp</dimen>
     <dimen name="common_padding_mid">10dp</dimen>
     <dimen name="common_padding_small">4dp</dimen>
-    <dimen name="user_icon">250dp</dimen>
+    <dimen name="user_icon_big">150dp</dimen>
+    <dimen name="user_icon_mid">100dp</dimen>
+    <dimen name="user_icon_small">75dp</dimen>
 
 </resources>

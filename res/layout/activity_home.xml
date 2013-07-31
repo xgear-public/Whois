@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/user_icon"
-        android:layout_width="@dimen/user_icon"
-        android:layout_height="@dimen/user_icon"
+        android:layout_width="@dimen/user_icon_big"
+        android:layout_height="@dimen/user_icon_big"
         android:paddingTop="@dimen/common_padding_mid"
         android:scaleType="fitCenter" />
 
