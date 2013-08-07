@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res/by.xgear.whois"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -24,8 +25,15 @@
     </by.xgear.louversview.LouversView>
 
     <by.xgear.whois.ui.view.SkewImageView
-        android:layout_width="@dimen/user_icon_big"
-        android:layout_height="@dimen/user_icon_big"
-        android:src="@drawable/strictdroid" />
+        android:id="@+id/skew_image"
+        app:img="@drawable/strictdroid"
+        android:layout_width="300px"
+        android:layout_height="300px" />
+
+    <SeekBar
+        android:id="@+id/angle_seek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="180" />
 
 </LinearLayout>
