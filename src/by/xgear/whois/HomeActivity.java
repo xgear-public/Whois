@@ -1,14 +1,12 @@
 package by.xgear.whois;
 
-import java.util.List;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.nfc.NfcEvent;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
+import android.nfc.NfcEvent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -19,9 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.ImageView;
-import by.xgear.whois.entity.ComparisonRoot;
-import by.xgear.whois.entity.Person;
+import android.widget.Toast;
+import by.xgear.louversview.LouversView;
+import by.xgear.whois.entity.UserInfoRoot;
 import by.xgear.whois.nfc.NFCManager;
 import by.xgear.whois.rest.RestHelper;
 import by.xgear.whois.ui.activity.NFCActivity;
@@ -30,14 +28,13 @@ import by.xgear.whois.ui.fragment.PickUserDialogFragment;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 public class HomeActivity extends FragmentActivity {
 	
 	public static final String USERNAME = "username";
 	
 	private Button mCompare;
-	private ImageView mUserIcon;
+	private LouversView mUserIcon;
 	
 	private String mCurUsername;
 
@@ -46,14 +43,11 @@ public class HomeActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home);
 		mCompare = (Button)findViewById(R.id.compare);
-		mUserIcon = (ImageView)findViewById(R.id.user_icon);
+		mUserIcon = (LouversView)findViewById(R.id.user_icon);
 		mCompare.setOnClickListener(mStartClickListener);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
 		mCurUsername = prefs.getString(USERNAME, null);
-		if(!TextUtils.isEmpty(mCurUsername)) {
-			getActionBar().setTitle(mCurUsername);
-		}
 		
 		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
 		nfcAdapter.setNdefPushMessageCallback(mSendNFCMessageCallback, this);
@@ -64,6 +58,24 @@ public class HomeActivity extends FragmentActivity {
 		super.onStart();
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		prefs.registerOnSharedPreferenceChangeListener(mPrefsChangeListener);
+		if(!TextUtils.isEmpty(mCurUsername)) {
+			getActionBar().setTitle(mCurUsername);
+			getRestHelper().getUserInfo(new Listener<UserInfoRoot>() {
+
+				@Override
+				public void onResponse(UserInfoRoot response) {
+					Toast.makeText(HomeActivity.this, "Success", Toast.LENGTH_SHORT).show();
+				}
+			}, new ErrorListener(){
+
+				@Override
+				public void onErrorResponse(VolleyError error) {
+					Toast.makeText(HomeActivity.this, error.getMessage(), Toast.LENGTH_LONG).show();
+				}
+				
+			},
+			mCurUsername);
+		}
 	}
 
 	@Override

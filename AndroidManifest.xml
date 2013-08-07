@@ -9,7 +9,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="16" />
 
     <application
         android:name="by.xgear.whois.WhoisApplication"
