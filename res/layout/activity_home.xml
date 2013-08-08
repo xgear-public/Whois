@@ -6,29 +6,10 @@
     android:orientation="vertical"
     android:padding="@dimen/common_padding_mid" >
 
-    <Button
-        android:id="@+id/compare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/compare" />
-
-    <by.xgear.louversview.LouversView
-        android:id="@+id/user_icon"
-        android:layout_width="@dimen/user_icon_big"
-        android:layout_height="@dimen/user_icon_big"
-        android:background="@android:color/holo_blue_light"
-        android:paddingTop="@dimen/common_padding_mid" >
-
-        <include layout="@layout/item_1" />
-
-        <include layout="@layout/item_2" />
-    </by.xgear.louversview.LouversView>
-
     <by.xgear.whois.ui.view.SkewImageView
         android:id="@+id/skew_image"
-        app:img="@drawable/strictdroid"
-        android:layout_width="300px"
-        android:layout_height="300px" />
+        android:layout_width="400px"
+        android:layout_height="400px" />
 
     <SeekBar
         android:id="@+id/angle_seek"

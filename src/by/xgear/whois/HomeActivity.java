@@ -36,7 +36,7 @@ public class HomeActivity extends FragmentActivity {
 	public static final String USERNAME = "username";
 	
 	private Button mCompare;
-	private LouversView mUserIcon;
+//	private LouversView mUserIcon;
 	
 	private String mCurUsername;
 	private SeekBar mAngleSeekBar;
@@ -46,10 +46,10 @@ public class HomeActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home);
-		mCompare = (Button)findViewById(R.id.compare);
-		mUserIcon = (LouversView)findViewById(R.id.user_icon);
+//		mCompare = (Button)findViewById(R.id.compare);
+//		mUserIcon = (LouversView)findViewById(R.id.user_icon);
 		mAngleSeekBar = (SeekBar)findViewById(R.id.angle_seek);
-		mCompare.setOnClickListener(mStartClickListener);
+//		mCompare.setOnClickListener(mStartClickListener);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
 		mCurUsername = prefs.getString(USERNAME, null);

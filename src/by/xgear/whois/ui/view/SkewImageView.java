@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -25,24 +26,27 @@ public class SkewImageView extends ImageView {
 //		int[] attrsArray = new int[] {
 //		        android.R.attr.src, // 0
 //		    };
-		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SkewImageView);
-		Drawable background = ta.getDrawable(R.styleable.SkewImageView_img);
-		ta.recycle();
+//		TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.SkewImageView);
+//		Drawable background = ta.getDrawable(R.styleable.SkewImageView_img);
+//		ta.recycle();
 		
-		int width = background.getIntrinsicWidth();
-	    width = width > 0 ? width : 1;
-	    int height = background.getIntrinsicHeight();
-	    height = height > 0 ? height : 1;
-	    data = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-	    Canvas canvas = new Canvas(data); 
-	    background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-	    background.draw(canvas);
-	    data = Bitmap.createScaledBitmap(data, 300, 300, false);
-	    bArr = new Bitmap[3];
+//		int width = background.getIntrinsicWidth();
+//	    width = width > 0 ? width : 1;
+//	    int height = background.getIntrinsicHeight();
+//	    height = height > 0 ? height : 1;
+//	    data = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+//	    Canvas canvas = new Canvas(data); 
+//	    background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+//	    background.draw(canvas);
+//	    Bitmap.
+	    data = BitmapFactory.decodeResource(getResources(), R.drawable.strictdroid_lined);
+	    data = Bitmap.createScaledBitmap(data, 400, 400, true);
+	    bArr = new Bitmap[4];
 
-	    bArr[0] = Bitmap.createBitmap(data, 0, 0, 300, 100); 
-	    bArr[1] = Bitmap.createBitmap(data, 0, 100, 300, 100); 
-	    bArr[2] = Bitmap.createBitmap(data, 0, 200, 300, 100); 
+	    bArr[0] = Bitmap.createBitmap(data, 0, 0, 400, 100); 
+	    bArr[1] = Bitmap.createBitmap(data, 0, 100, 400, 100); 
+	    bArr[2] = Bitmap.createBitmap(data, 0, 200, 400, 100); 
+	    bArr[3] = Bitmap.createBitmap(data, 0, 300, 400, 100); 
 	    
 	    skew = new Matrix();
 	    mCamera = new Camera();
@@ -59,12 +63,42 @@ public class SkewImageView extends ImageView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.save();
-		canvas.drawBitmap(applyMatrix(bArr[0], 0), 0, 0, null);
-		canvas.drawBitmap(applyMatrix(bArr[1], 1), 0, 100, null);
-		canvas.drawBitmap(applyMatrix(bArr[2], 2), 0, 200, null);
-//		applyMatrix(canvas);
+		Matrix m0 = getRotationMatrix(angle);
+		canvas.drawBitmap(bArr[0], m0, null);
+		
+		Matrix m1 = getRotationMatrix(angle);
+		m1.postTranslate(0, 100);
+		canvas.drawBitmap(bArr[1], m1, null);
+		
+		Matrix m2 = getRotationMatrix(angle);
+		m2.postTranslate(0, 200);
+		canvas.drawBitmap(bArr[2], m2, null);
+		
+		Matrix m3 = getRotationMatrix(angle);
+		m3.postTranslate(0, 300);
+		canvas.drawBitmap(bArr[3], m3, null);
+//		canvas.drawBitmap(applyMatrix(bArr[1], 1), 0, 100, null);
+//		canvas.drawBitmap(applyMatrix(bArr[2], 2), 0, 200, null);
+//		canvas.drawBitmap(applyMatrix(bArr[3], 3), 0, 300, null);
+
+////		canvas.drawBitmap(data, 0, 0, null);
+//		skewCanvas(canvas);
 		super.onDraw(canvas);
 		canvas.restore();
+	}
+	
+	public void skewCanvas(Canvas canvas) {
+		  mCamera.save();
+		  mCamera.rotateX(angle);
+		  mCamera.getMatrix(skew);
+		  mCamera.restore(); 
+
+		  int CenterX = 200;
+		  int CenterY = 50; 
+		  skew.preTranslate(-CenterX, -CenterY); //This is the key to getting the correct viewing perspective
+		  skew.postTranslate(CenterX, CenterY); 
+		  
+		  canvas.concat(skew);
 	}
 	
 	public Bitmap applyMatrix(Bitmap bmp, int i) {
@@ -73,17 +107,31 @@ public class SkewImageView extends ImageView {
 		  mCamera.rotateY(0);
 		  mCamera.rotateZ(0);
 		  mCamera.getMatrix(skew);
+		  mCamera.restore(); 
 
-		  int CenterX = 150;
-		  int CenterY = 50; 
+		  int CenterX = 200;
+		  int CenterY = 50+i*100; 
 		  skew.preTranslate(-CenterX, -CenterY); //This is the key to getting the correct viewing perspective
 		  skew.postTranslate(CenterX, CenterY); 
 		  
-		  Bitmap result = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), skew, true);
-//		  canvas.concat(skew);
-		  mCamera.restore(); 
+		  Bitmap result = Bitmap.createBitmap(bmp, 0, 0, 400, 400, skew, true);
 		  return result;
 		}
+	
+	private Matrix getRotationMatrix(int angle){
+		  mCamera.save();
+		  mCamera.rotateX(angle);
+		  mCamera.rotateY(0);
+		  mCamera.rotateZ(0);
+		  mCamera.getMatrix(skew);
+		  mCamera.restore(); 
+
+		  int CenterX = 200;
+		  int CenterY = 50; 
+		  skew.preTranslate(-CenterX, -CenterY); //This is the key to getting the correct viewing perspective
+		  skew.postTranslate(CenterX, CenterY); 
+		  return skew;
+	}
 
 	public int getAngle() {
 		return angle;
