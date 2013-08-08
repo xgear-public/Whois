@@ -20,6 +20,9 @@ public class SkewImageView extends ImageView {
 	private Matrix skew;
 	private Camera mCamera;
 	private int angle = 0;
+	
+	private boolean isInOffsetMode;
+	private int mOffset;
 
 	public SkewImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -118,7 +121,7 @@ public class SkewImageView extends ImageView {
 		  return result;
 		}
 	
-	private Matrix getRotationMatrix(int angle){
+	private Matrix getRotationMatrix(int angle) {
 		  mCamera.save();
 		  mCamera.rotateX(angle);
 		  mCamera.rotateY(0);

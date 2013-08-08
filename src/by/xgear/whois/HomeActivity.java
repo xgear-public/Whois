@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
-import by.xgear.louversview.LouversView;
 import by.xgear.whois.entity.UserInfoRoot;
 import by.xgear.whois.nfc.NFCManager;
 import by.xgear.whois.rest.RestHelper;
@@ -40,6 +39,7 @@ public class HomeActivity extends FragmentActivity {
 	
 	private String mCurUsername;
 	private SeekBar mAngleSeekBar;
+	private SeekBar mMovomentSeekBar;
 	private SkewImageView mSkewImage;
 
 	@Override
@@ -49,6 +49,7 @@ public class HomeActivity extends FragmentActivity {
 //		mCompare = (Button)findViewById(R.id.compare);
 //		mUserIcon = (LouversView)findViewById(R.id.user_icon);
 		mAngleSeekBar = (SeekBar)findViewById(R.id.angle_seek);
+		mMovomentSeekBar = (SeekBar)findViewById(R.id.movoment_seek);
 //		mCompare.setOnClickListener(mStartClickListener);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
@@ -73,6 +74,27 @@ public class HomeActivity extends FragmentActivity {
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				mSkewImage.setAngle(progress);
 				mSkewImage.invalidate();
+			}
+		});
+		
+		mMovomentSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 //		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
