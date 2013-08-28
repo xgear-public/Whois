@@ -1,17 +1,15 @@
 package by.xgear.whois.ui.view;
 
-import by.xgear.whois.R;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import by.xgear.whois.R;
 
 public class SkewImageView extends ImageView {
 	
@@ -22,7 +20,10 @@ public class SkewImageView extends ImageView {
 	private int angle = 0;
 	
 	private boolean isInOffsetMode;
-	private int mOffset;
+	private int mOffset = 0;
+
+	private float mLouverWidth = 100;
+	private float MAX_ANGLE = 40;
 
 	public SkewImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -42,14 +43,18 @@ public class SkewImageView extends ImageView {
 //	    background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
 //	    background.draw(canvas);
 //	    Bitmap.
-	    data = BitmapFactory.decodeResource(getResources(), R.drawable.strictdroid_lined);
-	    data = Bitmap.createScaledBitmap(data, 400, 400, true);
-	    bArr = new Bitmap[4];
+	    data = BitmapFactory.decodeResource(getResources(), R.drawable.skew);
+	    data = Bitmap.createScaledBitmap(data, 400, 800, true);
+	    bArr = new Bitmap[8];
 
 	    bArr[0] = Bitmap.createBitmap(data, 0, 0, 400, 100); 
 	    bArr[1] = Bitmap.createBitmap(data, 0, 100, 400, 100); 
 	    bArr[2] = Bitmap.createBitmap(data, 0, 200, 400, 100); 
 	    bArr[3] = Bitmap.createBitmap(data, 0, 300, 400, 100); 
+	    bArr[4] = Bitmap.createBitmap(data, 0, 400, 400, 100); 
+	    bArr[5] = Bitmap.createBitmap(data, 0, 500, 400, 100); 
+	    bArr[6] = Bitmap.createBitmap(data, 0, 600, 400, 100); 
+	    bArr[7] = Bitmap.createBitmap(data, 0, 700, 400, 100); 
 	    
 	    skew = new Matrix();
 	    mCamera = new Camera();
@@ -66,20 +71,40 @@ public class SkewImageView extends ImageView {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.save();
-		Matrix m0 = getRotationMatrix(angle);
-		canvas.drawBitmap(bArr[0], m0, null);
+		canvas.drawColor(Color.CYAN);
 		
-		Matrix m1 = getRotationMatrix(angle);
-		m1.postTranslate(0, 100);
-		canvas.drawBitmap(bArr[1], m1, null);
+		Matrix m7= getRotationMatrix(getAngleByOffset(mOffset, 7));
+		m7.postTranslate(0, 700/*+getMarginByOffset(mOffset, 7)*/);
+		canvas.drawBitmap(bArr[7], m7, null);
 		
-		Matrix m2 = getRotationMatrix(angle);
-		m2.postTranslate(0, 200);
+		Matrix m6 = getRotationMatrix(getAngleByOffset(mOffset, 6));
+		m6.postTranslate(0, 600+getMarginByOffset(mOffset, 6));
+		canvas.drawBitmap(bArr[6], m6, null);
+		
+		Matrix m5 = getRotationMatrix(getAngleByOffset(mOffset, 5));
+		m5.postTranslate(0, 500+getMarginByOffset(mOffset, 5));
+		canvas.drawBitmap(bArr[5], m5, null);
+		
+		Matrix m4 = getRotationMatrix(getAngleByOffset(mOffset, 4));
+		m4.postTranslate(0, 400+getMarginByOffset(mOffset, 4));
+		canvas.drawBitmap(bArr[4], m4, null);
+		
+		Matrix m3 = getRotationMatrix(getAngleByOffset(mOffset, 3));
+		m3.postTranslate(0, 300+getMarginByOffset(mOffset, 3));
+		canvas.drawBitmap(bArr[3], m3, null);
+		
+		Matrix m2 = getRotationMatrix(getAngleByOffset(mOffset, 2));
+		m2.postTranslate(0, 200+getMarginByOffset(mOffset, 2));
 		canvas.drawBitmap(bArr[2], m2, null);
 		
-		Matrix m3 = getRotationMatrix(angle);
-		m3.postTranslate(0, 300);
-		canvas.drawBitmap(bArr[3], m3, null);
+		Matrix m1 = getRotationMatrix(getAngleByOffset(mOffset, 1));
+		m1.postTranslate(0, 100+getMarginByOffset(mOffset, 1));
+		canvas.drawBitmap(bArr[1], m1, null);
+		
+//		Matrix m0 = getRotationMatrix(getAngleByOffset(mOffset, 0));
+//		m0.postTranslate(0, 0+getMarginByOffset(mOffset, 0));
+//		canvas.drawBitmap(bArr[0], m0, null);
+		
 //		canvas.drawBitmap(applyMatrix(bArr[1], 1), 0, 100, null);
 //		canvas.drawBitmap(applyMatrix(bArr[2], 2), 0, 200, null);
 //		canvas.drawBitmap(applyMatrix(bArr[3], 3), 0, 300, null);
@@ -88,6 +113,26 @@ public class SkewImageView extends ImageView {
 //		skewCanvas(canvas);
 		super.onDraw(canvas);
 		canvas.restore();
+	}
+	
+	private float getAngleByOffset(float ofst, int i) {
+//		return 0;
+		int angle = 0;
+		if(ofst < i*mLouverWidth-mLouverWidth*3/4)
+			return angle;
+		else if(ofst > i*mLouverWidth-mLouverWidth/4 - i*40)
+			return MAX_ANGLE;
+		else
+			return MAX_ANGLE*Math.abs((ofst - ((i-1)*mLouverWidth+mLouverWidth/4)))/(mLouverWidth/2);
+	}
+	
+	private int getMarginByOffset(int ofst, int i) {
+//		return 0;
+		int margin = 0;
+		if(ofst < i*mLouverWidth-mLouverWidth*3/4 - i*mLouverWidth/4)
+			return margin;
+		else
+			return (int) (ofst - (i*mLouverWidth - mLouverWidth*3/4 - i*mLouverWidth/4));
 	}
 	
 	public void skewCanvas(Canvas canvas) {
@@ -121,7 +166,7 @@ public class SkewImageView extends ImageView {
 		  return result;
 		}
 	
-	private Matrix getRotationMatrix(int angle) {
+	private Matrix getRotationMatrix(float angle) {
 		  mCamera.save();
 		  mCamera.rotateX(angle);
 		  mCamera.rotateY(0);
@@ -142,6 +187,14 @@ public class SkewImageView extends ImageView {
 
 	public void setAngle(int angle) {
 		this.angle = angle;
+	}
+
+	public int getOffset() {
+		return mOffset;
+	}
+
+	public void setOffset(int mOffset) {
+		this.mOffset = mOffset;
 	}
 
 	

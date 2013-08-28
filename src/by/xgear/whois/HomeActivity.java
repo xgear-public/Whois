@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
 import android.nfc.NfcAdapter.CreateNdefMessageCallback;
 import android.nfc.NfcEvent;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
 import by.xgear.whois.entity.UserInfoRoot;
 import by.xgear.whois.nfc.NFCManager;
@@ -41,6 +43,7 @@ public class HomeActivity extends FragmentActivity {
 	private SeekBar mAngleSeekBar;
 	private SeekBar mMovomentSeekBar;
 	private SkewImageView mSkewImage;
+	private TextView mAngleText, mMovementText;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,8 @@ public class HomeActivity extends FragmentActivity {
 //		mUserIcon = (LouversView)findViewById(R.id.user_icon);
 		mAngleSeekBar = (SeekBar)findViewById(R.id.angle_seek);
 		mMovomentSeekBar = (SeekBar)findViewById(R.id.movoment_seek);
+		mAngleText = (TextView)findViewById(R.id.angle_text);
+		mMovementText = (TextView)findViewById(R.id.movoment_text);
 //		mCompare.setOnClickListener(mStartClickListener);
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
@@ -72,6 +77,7 @@ public class HomeActivity extends FragmentActivity {
 			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				mAngleText.setText(String.valueOf(progress));
 				mSkewImage.setAngle(progress);
 				mSkewImage.invalidate();
 			}
@@ -93,12 +99,13 @@ public class HomeActivity extends FragmentActivity {
 			
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				// TODO Auto-generated method stub
-				
+				mMovementText.setText(String.valueOf(progress));
+				mSkewImage.setOffset(progress);
+				mSkewImage.invalidate();
 			}
 		});
-//		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
-//		nfcAdapter.setNdefPushMessageCallback(mSendNFCMessageCallback, this);
+		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
+		nfcAdapter.setNdefPushMessageCallback(mSendNFCMessageCallback, this);
 	}
 	
 	@Override

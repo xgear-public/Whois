@@ -9,18 +9,28 @@
     <by.xgear.whois.ui.view.SkewImageView
         android:id="@+id/skew_image"
         android:layout_width="400px"
-        android:layout_height="400px" />
+        android:layout_height="800px" />
+
+    <TextView
+        android:id="@+id/angle_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <SeekBar
         android:id="@+id/angle_seek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:max="180" />
-    
+
+    <TextView
+        android:id="@+id/movoment_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <SeekBar
         android:id="@+id/movoment_seek"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="400" />
+        android:max="800" />
 
 </LinearLayout>
