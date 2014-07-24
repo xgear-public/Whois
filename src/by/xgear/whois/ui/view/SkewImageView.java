@@ -7,23 +7,40 @@ import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.widget.ImageView;
 import by.xgear.whois.R;
 
 public class SkewImageView extends ImageView {
 	
+	public enum Direction{
+		AXIS_X,
+		AXIS_Y;
+	}
+	
+	private Direction mLDirection = Direction.AXIS_Y;
+	
 	private Bitmap data;
 	private Bitmap[] bArr;
 	private Matrix skew;
 	private Camera mCamera;
-	private int angle = 0;
+	private int angle;
+	private int mLouversCount = 8;
 	
 	private boolean isInOffsetMode;
 	private int mOffset = 0;
 
 	private float mLouverWidth = 100;
 	private float MAX_ANGLE = 40;
+
+    private GestureDetectorCompat mGestureDetector;
+    private VelocityTracker mVelocityTracker;
 
 	public SkewImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -43,6 +60,9 @@ public class SkewImageView extends ImageView {
 //	    background.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
 //	    background.draw(canvas);
 //	    Bitmap.
+
+        mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
+        
 	    data = BitmapFactory.decodeResource(getResources(), R.drawable.skew);
 	    data = Bitmap.createScaledBitmap(data, 400, 800, true);
 	    bArr = new Bitmap[8];
@@ -68,16 +88,25 @@ public class SkewImageView extends ImageView {
 		this(context, null, 0);
 	}
 
+	private int i;
+	private boolean isLocked;
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.save();
 		canvas.drawColor(Color.CYAN);
+		isLocked = (mLouversCount-1)*mLouverWidth-mLouverWidth*3/4 - (mLouversCount-1)*mLouverWidth/4 + mLouverWidth < mOffset;
+		for(i=mLouversCount-1; i>=0;i--){
+			Matrix m= getRotationMatrix(getAngleByOffset(mOffset, i));
+			if(!isLocked)
+				m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
+			else{
+				mOffset = (int) ((mLouversCount-1)*mLouverWidth-mLouverWidth*3/4 - (mLouversCount-1)*mLouverWidth/4 + mLouverWidth);
+				m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
+			}
+			canvas.drawBitmap(bArr[i], m, null);
+		}
 		
-		Matrix m7= getRotationMatrix(getAngleByOffset(mOffset, 7));
-		m7.postTranslate(0, 700/*+getMarginByOffset(mOffset, 7)*/);
-		canvas.drawBitmap(bArr[7], m7, null);
-		
-		Matrix m6 = getRotationMatrix(getAngleByOffset(mOffset, 6));
+/*		Matrix m6 = getRotationMatrix(getAngleByOffset(mOffset, 6));
 		m6.postTranslate(0, 600+getMarginByOffset(mOffset, 6));
 		canvas.drawBitmap(bArr[6], m6, null);
 		
@@ -99,7 +128,7 @@ public class SkewImageView extends ImageView {
 		
 		Matrix m1 = getRotationMatrix(getAngleByOffset(mOffset, 1));
 		m1.postTranslate(0, 100+getMarginByOffset(mOffset, 1));
-		canvas.drawBitmap(bArr[1], m1, null);
+		canvas.drawBitmap(bArr[1], m1, null);*/
 		
 //		Matrix m0 = getRotationMatrix(getAngleByOffset(mOffset, 0));
 //		m0.postTranslate(0, 0+getMarginByOffset(mOffset, 0));
@@ -118,21 +147,20 @@ public class SkewImageView extends ImageView {
 	private float getAngleByOffset(float ofst, int i) {
 //		return 0;
 		int angle = 0;
-		if(ofst < i*mLouverWidth-mLouverWidth*3/4)
+		ofst+=i*30;
+		if(ofst < (i+1)*mLouverWidth-mLouverWidth*3/4)
 			return angle;
-		else if(ofst > i*mLouverWidth-mLouverWidth/4 - i*40)
+		else if(ofst > (i+1)*mLouverWidth-mLouverWidth/4)
 			return MAX_ANGLE;
 		else
-			return MAX_ANGLE*Math.abs((ofst - ((i-1)*mLouverWidth+mLouverWidth/4)))/(mLouverWidth/2);
+			return MAX_ANGLE*Math.abs((ofst - ((i)*mLouverWidth+mLouverWidth/4)))/(mLouverWidth/2);
 	}
 	
 	private int getMarginByOffset(int ofst, int i) {
-//		return 0;
-		int margin = 0;
-		if(ofst < i*mLouverWidth-mLouverWidth*3/4 - i*mLouverWidth/4)
-			return margin;
+		if(ofst < i*mLouverWidth-mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth)
+			return 0;
 		else
-			return (int) (ofst - (i*mLouverWidth - mLouverWidth*3/4 - i*mLouverWidth/4));
+			return (int) (ofst - (i*mLouverWidth - mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth));
 	}
 	
 	public void skewCanvas(Canvas canvas) {
@@ -196,6 +224,53 @@ public class SkewImageView extends ImageView {
 	public void setOffset(int mOffset) {
 		this.mOffset = mOffset;
 	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent ev) {
+		mGestureDetector.onTouchEvent(ev);
+		return true;
+	}
+	
+	private final GestureDetector.SimpleOnGestureListener mGestureListener = new SimpleOnGestureListener(){
 
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			Log.d("Pelkin", "onFling ACTION_MOVE velocityX = "+velocityX+"\tvelocityY = "+velocityY);
+			return super.onFling(e1, e2, velocityX, velocityY);
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+//			Log.d("Pelkin", "x1="+e1.getX()+" y1="+e1.getY()+" mOffset = "+mOffset);
+//			Log.d("Pelkin", "x2="+e2.getX()+" y2="+e2.getY());
+			if(isBorderHit(e2.getX(), e2.getY())) {
+				mOffset-=distanceY;
+				mOffset = mOffset<0 ? 0 : mOffset;
+				invalidate();
+			}
+			Log.d("Pelkin", "mOffset="+mOffset);
+//			Log.d("Pelkin", "x="+e1.getX()+" y="+e1.getY()+" onScroll distanceX = "+distanceX+"\tdistanceY = "+distanceY);
+			return super.onScroll(e1, e2, distanceX, distanceY);
+		}
+		
+	};
+	
+	
+	//TODO look if scroll started near border and only then hit!
+	private boolean isBorderHit(float x, float y) {
+		switch (mLDirection) {
+			case AXIS_X:{//TODO mLouverWidth change to constants multiplexed on dp
+				return x < mOffset + mLouverWidth*1.5 && x > mOffset-mLouverWidth*0.5;
+			}
+			case AXIS_Y:{
+				return y < mOffset + mLouverWidth*1.5 && y > mOffset-mLouverWidth*0.5;
+			}
+			default:{
+				return false;
+			}
+		}
+	}
 	
 }

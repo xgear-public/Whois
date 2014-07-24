@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +60,11 @@ public class HomeActivity extends FragmentActivity {
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplication());
 		mCurUsername = prefs.getString(USERNAME, null);
+		
+		FragmentManager fr1, fr2;
+		fr1 = getSupportFragmentManager();
+		fr2 = getSupportFragmentManager();
+		Log.d("Pelkins", fr1 + " "+fr2);
 		
 		mSkewImage  = (SkewImageView)findViewById(R.id.skew_image);
 		mAngleSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
