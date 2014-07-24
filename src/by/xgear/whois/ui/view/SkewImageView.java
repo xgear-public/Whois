@@ -18,15 +18,22 @@ import android.widget.ImageView;
 import by.xgear.whois.R;
 
 public class SkewImageView extends ImageView {
+
+    public enum Direction{
+        AXIS_X,
+        AXIS_Y;
+    }
+
+    public enum MovementDirection{
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN;
+    }
 	
-	public enum Direction{
-		AXIS_X,
-		AXIS_Y;
-	}
-	
-	private Direction mLDirection = Direction.AXIS_Y;
-	
-	private Bitmap data;
+	private Direction mDirection = Direction.AXIS_Y;
+	private MovementDirection mMDirection = MovementDirection.DOWN;
+
 	private Bitmap[] bArr;
 	private Matrix skew;
 	private Camera mCamera;
@@ -39,8 +46,9 @@ public class SkewImageView extends ImageView {
 	private float mLouverWidth = 100;
 	private float MAX_ANGLE = 40;
 
+    private boolean mIsScrolling;
     private GestureDetectorCompat mGestureDetector;
-    private VelocityTracker mVelocityTracker;
+//    private VelocityTracker mVelocityTracker;
 
 	public SkewImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -62,8 +70,8 @@ public class SkewImageView extends ImageView {
 //	    Bitmap.
 
         mGestureDetector = new GestureDetectorCompat(context, mGestureListener);
-        
-	    data = BitmapFactory.decodeResource(getResources(), R.drawable.skew);
+
+        Bitmap data = BitmapFactory.decodeResource(getResources(), R.drawable.skew);
 	    data = Bitmap.createScaledBitmap(data, 400, 800, true);
 	    bArr = new Bitmap[8];
 
@@ -74,10 +82,15 @@ public class SkewImageView extends ImageView {
 	    bArr[4] = Bitmap.createBitmap(data, 0, 400, 400, 100); 
 	    bArr[5] = Bitmap.createBitmap(data, 0, 500, 400, 100); 
 	    bArr[6] = Bitmap.createBitmap(data, 0, 600, 400, 100); 
-	    bArr[7] = Bitmap.createBitmap(data, 0, 700, 400, 100); 
+	    bArr[7] = Bitmap.createBitmap(data, 0, 700, 400, 100);
+
+        data.recycle();
+        data = null;
 	    
 	    skew = new Matrix();
 	    mCamera = new Camera();
+
+        mLockEdge = (int) ((mLouversCount-1) * mLouverWidth - mLouverWidth * 3/4 - (mLouversCount-1) * mLouverWidth/4 + mLouverWidth);
 	}
 
 	public SkewImageView(Context context, AttributeSet attrs) {
@@ -90,21 +103,23 @@ public class SkewImageView extends ImageView {
 
 	private int i;
 	private boolean isLocked;
+    private int mLockEdge;
 	@Override
 	protected void onDraw(Canvas canvas) {
 		canvas.save();
-		canvas.drawColor(Color.CYAN);
-		isLocked = (mLouversCount-1)*mLouverWidth-mLouverWidth*3/4 - (mLouversCount-1)*mLouverWidth/4 + mLouverWidth < mOffset;
-		for(i=mLouversCount-1; i>=0;i--){
-			Matrix m= getRotationMatrix(getAngleByOffset(mOffset, i));
-			if(!isLocked)
-				m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
-			else{
-				mOffset = (int) ((mLouversCount-1)*mLouverWidth-mLouverWidth*3/4 - (mLouversCount-1)*mLouverWidth/4 + mLouverWidth);
-				m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
-			}
-			canvas.drawBitmap(bArr[i], m, null);
-		}
+		canvas.drawColor(Color.WHITE);
+
+        isLocked = mLockEdge < mOffset;
+        for(i=mLouversCount-1; i>=0;i--){
+            Matrix m= getRotationMatrix(getAngleByOffset(mOffset, i));
+            if(!isLocked)
+                m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
+            else{
+                mOffset = mLockEdge;
+                m.postTranslate(0, i*mLouverWidth+getMarginByOffset(mOffset, i));
+            }
+            canvas.drawBitmap(bArr[i], m, null);
+        }
 		
 /*		Matrix m6 = getRotationMatrix(getAngleByOffset(mOffset, 6));
 		m6.postTranslate(0, 600+getMarginByOffset(mOffset, 6));
@@ -144,23 +159,23 @@ public class SkewImageView extends ImageView {
 		canvas.restore();
 	}
 	
-	private float getAngleByOffset(float ofst, int i) {
+	private float getAngleByOffset(float offset, int i) {
 //		return 0;
 		int angle = 0;
-		ofst+=i*30;
-		if(ofst < (i+1)*mLouverWidth-mLouverWidth*3/4)
+		offset+=i*30;
+		if(offset < (i+1)*mLouverWidth-mLouverWidth*3/4)
 			return angle;
-		else if(ofst > (i+1)*mLouverWidth-mLouverWidth/4)
+		else if(offset > (i+1)*mLouverWidth-mLouverWidth/4)
 			return MAX_ANGLE;
 		else
-			return MAX_ANGLE*Math.abs((ofst - ((i)*mLouverWidth+mLouverWidth/4)))/(mLouverWidth/2);
+			return MAX_ANGLE*Math.abs((offset - ((i)*mLouverWidth+mLouverWidth/4)))/(mLouverWidth/2);
 	}
 	
-	private int getMarginByOffset(int ofst, int i) {
-		if(ofst < i*mLouverWidth-mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth)
+	private int getMarginByOffset(int offset, int i) {
+		if(offset < i*mLouverWidth-mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth)
 			return 0;
 		else
-			return (int) (ofst - (i*mLouverWidth - mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth));
+			return (int) (offset - (i*mLouverWidth - mLouverWidth*3/4 - i*mLouverWidth/4 + mLouverWidth));
 	}
 	
 	public void skewCanvas(Canvas canvas) {
@@ -208,49 +223,43 @@ public class SkewImageView extends ImageView {
 		  skew.postTranslate(CenterX, CenterY); 
 		  return skew;
 	}
-
-	public int getAngle() {
-		return angle;
-	}
-
-	public void setAngle(int angle) {
-		this.angle = angle;
-	}
-
-	public int getOffset() {
-		return mOffset;
-	}
-
-	public void setOffset(int mOffset) {
-		this.mOffset = mOffset;
-	}
 	
 	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-		mGestureDetector.onTouchEvent(ev);
+	public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_UP)
+            mIsScrolling = false;
+        if(event.getAction() == MotionEvent.ACTION_CANCEL)
+            mIsScrolling = false;
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+            mIsScrolling = isBorderHit(event.getX(), event.getY());
+        }
+
+//        if(event.getAction() == MotionEvent.ACTION_UP) {
+//            if(mIsScrolling ) {
+//                Log.d("OnTouchListener --> onTouch ACTION_UP");
+//                mIsScrolling  = false;
+//                handleScrollFinished();
+//            };
+//        }
+        if(mIsScrolling)
+		    mGestureDetector.onTouchEvent(event);
 		return true;
 	}
 	
 	private final GestureDetector.SimpleOnGestureListener mGestureListener = new SimpleOnGestureListener(){
 
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-			Log.d("Pelkin", "onFling ACTION_MOVE velocityX = "+velocityX+"\tvelocityY = "+velocityY);
-			return super.onFling(e1, e2, velocityX, velocityY);
-		}
 
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
 //			Log.d("Pelkin", "x1="+e1.getX()+" y1="+e1.getY()+" mOffset = "+mOffset);
 //			Log.d("Pelkin", "x2="+e2.getX()+" y2="+e2.getY());
-			if(isBorderHit(e2.getX(), e2.getY())) {
-				mOffset-=distanceY;
-				mOffset = mOffset<0 ? 0 : mOffset;
-				invalidate();
-			}
-			Log.d("Pelkin", "mOffset="+mOffset);
+//			if(isBorderHit(e2.getX(), e2.getY())) {
+                mOffset-=distanceY;
+                mOffset = mOffset < 0 ? 0 : mOffset;
+                invalidate();
+//			}
+			Log.d("Pelkin", "mOffset=" + mOffset + "\tdistanceY = " + distanceY);
 //			Log.d("Pelkin", "x="+e1.getX()+" y="+e1.getY()+" onScroll distanceX = "+distanceX+"\tdistanceY = "+distanceY);
 			return super.onScroll(e1, e2, distanceX, distanceY);
 		}
@@ -260,17 +269,44 @@ public class SkewImageView extends ImageView {
 	
 	//TODO look if scroll started near border and only then hit!
 	private boolean isBorderHit(float x, float y) {
-		switch (mLDirection) {
+        Log.d("Pelkin", "isBorderHit");
+		switch (mDirection) {
 			case AXIS_X:{//TODO mLouverWidth change to constants multiplexed on dp
 				return x < mOffset + mLouverWidth*1.5 && x > mOffset-mLouverWidth*0.5;
 			}
 			case AXIS_Y:{
-				return y < mOffset + mLouverWidth*1.5 && y > mOffset-mLouverWidth*0.5;
+                if(y < mLouverWidth * 1.5) {
+                    mMDirection = MovementDirection.DOWN;
+                    return true;
+                }else if(y > mLouverWidth * (mLouversCount - 1)) {
+                    mMDirection = MovementDirection.UP;
+                    mOffset = mLockEdge;
+                    return true;
+                } else {
+                    return false;
+                }
+//				return y < mOffset + mLouverWidth*1.5 && y > mOffset-mLouverWidth*0.5;
 			}
 			default:{
 				return false;
 			}
 		}
 	}
-	
+
+
+    public int getAngle() {
+        return angle;
+    }
+
+    public void setAngle(int angle) {
+        this.angle = angle;
+    }
+
+    public int getOffset() {
+        return mOffset;
+    }
+
+    public void setOffset(int mOffset) {
+        this.mOffset = mOffset;
+    }
 }
