@@ -111,7 +111,8 @@ public class HomeActivity extends FragmentActivity {
 			}
 		});
 		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());
-		nfcAdapter.setNdefPushMessageCallback(mSendNFCMessageCallback, this);
+        if(nfcAdapter != null)
+		    nfcAdapter.setNdefPushMessageCallback(mSendNFCMessageCallback, this);
 	}
 	
 	@Override

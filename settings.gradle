@@ -1,0 +1,4 @@
+include ':volley'
+project(':volley').projectDir = new File(settingsDir, '../volley')
+include ':louvers-view'
+project(':louvers-view').projectDir = new File(settingsDir, '../louvers-view')
